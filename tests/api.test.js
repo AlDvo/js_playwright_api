@@ -50,6 +50,8 @@ test.describe.only("API challenge", () => {
     });
 
     let headers = response.headers();
+
+    expect(headers["x-challenger"].length).toBeGreaterThan(0);
     expect(response.status()).toBe(200);
     expect(headers).toEqual(expect.objectContaining({ "x-challenger": token }));
   });
@@ -63,6 +65,8 @@ test.describe.only("API challenge", () => {
     });
 
     let headers = response.headers();
+
+    expect((await response.json())["challenges"].length).toEqual(59);
     expect(response.status()).toBe(200);
     expect(headers).toEqual(expect.objectContaining({ "x-challenger": token }));
   });
@@ -76,6 +80,8 @@ test.describe.only("API challenge", () => {
     });
 
     let headers = response.headers();
+
+    expect((await response.json())["todos"].length).toBeGreaterThan(0);
     expect(response.status()).toBe(200);
     expect(headers).toEqual(expect.objectContaining({ "x-challenger": token }));
   });
@@ -103,6 +109,7 @@ test.describe.only("API challenge", () => {
 
     let headers = response.headers();
 
+    expect((await response.json())["todos"][0]['id']).toEqual(id);
     expect(response.status()).toBe(200);
     expect(headers["x-challenger"]).toEqual(token);
   });
@@ -144,6 +151,8 @@ test.describe.only("API challenge", () => {
 
     let headers = response.headers();
 
+    expect((await response.json())["title"]).toEqual(todo["title"]);
+    expect((await response.json())["description"]).toEqual(todo["description"]);
     expect(response.status()).toBe(201);
     expect(headers["x-challenger"]).toEqual(token);
   });
@@ -162,6 +171,9 @@ test.describe.only("API challenge", () => {
 
     let headers = response.headers();
 
+    (await response.json())["todos"].forEach(element => {
+      expect(element["doneStatus"]).toBe(filter["doneStatus"]);
+    });
     expect(response.status()).toBe(200);
     expect(headers["x-challenger"]).toEqual(token);
   });
@@ -230,6 +242,8 @@ test.describe.only("API challenge", () => {
 
     let headers = response.headers();
 
+    expect((await response.json())["title"]).toEqual(todo["title"]);
+    expect((await response.json())["description"]).toEqual(todo["description"]);
     expect(response.status()).toBe(201);
     expect(headers["x-challenger"]).toEqual(token);
   });
@@ -281,6 +295,9 @@ test.describe.only("API challenge", () => {
 
     let headers = response.headers();
 
+    expect((await response.json())["title"]).toEqual(todo["title"]);
+    expect((await response.json())["description"]).toEqual(todo["description"]);    
+    expect((await response.json())["id"]).toEqual(id);
     expect(response.status()).toBe(200);
     expect(headers["x-challenger"]).toEqual(token);
   });
@@ -311,23 +328,28 @@ test.describe.only("API challenge", () => {
 
     let headers = response.headers();
 
+    expect((await response.json())["title"]).toEqual(todo["title"]);
+    expect((await response.json())["description"]).toEqual(todo["description"]);    
+    expect((await response.json())["id"]).toEqual(id);
     expect(response.status()).toBe(200);
     expect(headers["x-challenger"]).toEqual(token);
   });
 
   test("Отправить запрос PUT /todos/{id} partial (200) @PUT", async ({ request }) => {
     let id = 1;
+    let title = faker.string.alpha(15)
     let response = await request.put(`${URL}todos/${id}`, {
       headers: {
         "x-challenger": token,
       },
       data: {
-        "title": faker.string.alpha(15),
+        "title": title,
       }
     });
 
     let headers = response.headers();
 
+    expect((await response.json())["title"]).toEqual(title);
     expect(response.status()).toBe(200);
     expect(headers["x-challenger"]).toEqual(token);
   });
@@ -409,6 +431,7 @@ test.describe.only("API challenge", () => {
 
     let headers = response.headers();
 
+    expect((await response.text()).indexOf("<")).toEqual(0);
     expect(response.status()).toBe(200);
     expect(headers["x-challenger"]).toEqual(token);
   });
@@ -422,7 +445,7 @@ test.describe.only("API challenge", () => {
     });
 
     let headers = response.headers();
-
+    expect((await response.text()).indexOf("{")).toEqual(0);
     expect(response.status()).toBe(200);
     expect(headers["x-challenger"]).toEqual(token);
   });
@@ -551,6 +574,8 @@ test.describe.only("API challenge", () => {
 
     payload = await response.json();
 
+    expect(payload["xAuthToken"].length).toBeGreaterThan(0);
+    expect(payload["xChallenger"]).toEqual(token);
     expect(response.status()).toBe(200);
     expect(headers["x-challenger"]).toEqual(token);
   });
@@ -565,6 +590,7 @@ test.describe.only("API challenge", () => {
     });
     let headers = response.headers();
 
+    expect(await response.json()).toEqual(payload);
     expect(response.status()).toBe(200);
     expect(headers["x-challenger"]).toEqual(token);
   });
@@ -585,6 +611,7 @@ test.describe.only("API challenge", () => {
     });
     let headers = response.headers();
 
+    expect(await response.json()).toEqual(payload);
     expect(response.status()).toBe(200);
     expect(headers["x-challenger"]).toEqual(token);
   });
@@ -903,7 +930,7 @@ test.describe.only("API challenge", () => {
 
     let idNumber = (await responseTodos.json())['todos']
     let count = 20 - idNumber.length;
-    
+
     for (let index = 0; index < count; index++) {
       let response = await request.post(`${URL}todos`, {
         headers: {
