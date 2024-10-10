@@ -895,8 +895,16 @@ test.describe.only("API challenge", () => {
   });
 
   test("Отправить запрос POST /todos (201) all @POST", async ({ request }) => {
+    let responseTodos = await request.get(`${URL}todos`, {
+      headers: {
+        "x-challenger": token,
+      },
+    });
 
-    for (let index = 0; index < 20; index++) {
+    let idNumber = (await responseTodos.json())['todos']
+    let count = 20 - idNumber.length;
+    
+    for (let index = 0; index < count; index++) {
       let response = await request.post(`${URL}todos`, {
         headers: {
           "x-challenger": token
